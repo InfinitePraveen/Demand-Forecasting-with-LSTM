@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demand Forecasting with LSTM</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="page">
+    <header class="hero">
+        <div>
+            <p class="eyebrow">TensorFlow · LSTM · Time Series</p>
+            <h1>Demand Forecasting</h1>
+            <p class="subtitle">
+                Forecast future store-item demand from recent sales history.
+            </p>
+        </div>
+        <div class="profile">
+            <strong>Praveen Kumar</strong>
+            <span>Data Scientist | Open Source Learner | IBM Certified</span>
+            <div class="links">
+                <a href="https://github.com/InfinitePraveen" target="_blank">GitHub</a>
+                <a href="https://www.linkedin.com/in/infinitepraveen/" target="_blank">LinkedIn</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Run a forecast</h2>
+            <p class="muted">
+                Upload the Kaggle <code>train.csv</code> for a real store-item forecast.
+                If you do not upload a file, the app uses a small demo demand series.
+            </p>
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="grid">
+                    <label>
+                        Store
+                        <input type="number" name="store" min="1" max="10" value="{{ selected_store }}">
+                    </label>
+
+                    <label>
+                        Item
+                        <input type="number" name="item" min="1" max="50" value="{{ selected_item }}">
+                    </label>
+
+                    <label>
+                        Forecast days
+                        <input type="number" name="horizon" min="1" max="60" value="{{ horizon }}">
+                    </label>
+
+                    <label>
+                        Kaggle CSV (optional)
+                        <input type="file" name="file" accept=".csv">
+                    </label>
+                </div>
+
+                <button type="submit">Generate LSTM Forecast</button>
+            </form>
+        </section>
+
+        {% if error %}
+        <section class="card error">
+            <strong>Could not generate the forecast.</strong>
+            <p>{{ error }}</p>
+        </section>
+        {% endif %}
+
+        {% if result is not none %}
+        <section class="card">
+            <div class="result-head">
+                <div>
+                    <p class="eyebrow">Forecast result</p>
+                    <h2>Store {{ selected_store }} · Item {{ selected_item }}</h2>
+                </div>
+                <span class="badge">{{ mode }}</span>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Forecast demand</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in result.itertuples() %}
+                        <tr>
+                            <td>{{ row.date.strftime("%Y-%m-%d") }}</td>
+                            <td>{{ "%.2f"|format(row.forecast) }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% endif %}
+
+        <section class="card explanation">
+            <h2>How the demo works</h2>
+            <div class="steps">
+                <div><span>01</span><p>Take the latest 30 demand observations.</p></div>
+                <div><span>02</span><p>Scale the sequence with Min-Max scaling.</p></div>
+                <div><span>03</span><p>Pass the sequence through a TensorFlow LSTM.</p></div>
+                <div><span>04</span><p>Feed each prediction back into the next window.</p></div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Portfolio project by Praveen Kumar · Demand Forecasting with LSTM</p>
+    </footer>
+</div>
+</body>
+</html>
